@@ -107,6 +107,10 @@ def extract_flats(payload: Any, base_url: str = "") -> list[Flat]:
     return flats
 
 
+class LoginRequired(Exception):
+    """Нет сохранённого входа и не заданы логин/пароль: нужно запустить login.command."""
+
+
 class TrendAgentClient:
     def __init__(self, cfg: TrendAgent):
         self.cfg = cfg
@@ -114,13 +118,18 @@ class TrendAgentClient:
         self._browser: Browser | None = None
         self._ctx: BrowserContext | None = None
         self._lock = asyncio.Lock()
+        self._state_mtime = 0.0
 
     async def _context(self) -> BrowserContext:
-        if self._ctx:
+        state = Path(self.cfg.state_file)
+        mtime = state.stat().st_mtime if state.is_file() else 0.0
+        if self._ctx and mtime == self._state_mtime:
             return self._ctx
+        # Вход обновили через login.command: пересоздаём браузер с новыми cookie
+        await self.close()
+        self._state_mtime = mtime
         self._pw = await async_playwright().start()
         self._browser = await self._pw.chromium.launch(headless=self.cfg.headless)
-        state = Path(self.cfg.state_file)
         self._ctx = await self._browser.new_context(
             storage_state=str(state) if state.is_file() else None,
             locale="ru-RU",
@@ -130,7 +139,7 @@ class TrendAgentClient:
 
     async def _login(self, page: Page) -> None:
         if not (self.cfg.login and self.cfg.password):
-            raise RuntimeError("Не заданы TA_LOGIN / TA_PASSWORD")
+            raise LoginRequired()
         log.info("Вход в TrendAgent")
         await page.goto(self.cfg.login_url, wait_until="domcontentloaded")
         await page.locator(self.cfg.phone_selector).first.fill(self.cfg.login)
@@ -220,3 +229,4 @@ class TrendAgentClient:
             await self._browser.close()
         if self._pw:
             await self._pw.stop()
+        self._pw = self._browser = self._ctx = None

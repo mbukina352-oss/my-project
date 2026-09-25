@@ -21,6 +21,7 @@ FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
     ("Шагал студия 30м²", "Шагал", None, 30, 0),
     ("Джойс 35м 60кв", "Джойс", 35_000_000, 60, None),
     ("Символ 18 500 000 45.5 кв.м", "Символ", 18_500_000, 45.5, None),
+    ("пришли хай лайф планировку 30м2 30млн", "хай лайф", 30_000_000, 30, None),
 ])
 def test_parse_query(text, name, price, area, rooms):
     q = parse_query(text)

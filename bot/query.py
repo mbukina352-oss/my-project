@@ -11,6 +11,13 @@ _ROOMS_RE = re.compile(r"\b(\d)\s*-?\s*(?:к|комн\w*|ккв|кк\b)(?![а-я
 _STUDIO_RE = re.compile(r"\bстуди\w*\b", re.I)
 
 
+_FILLER_RE = re.compile(
+    r"(?<![а-яё])(жк|пришли\w*|скинь\w*|покажи\w*|найди\w*|нужн\w*|планировк\w*|квартир\w*|"
+    r"пожалуйста|плиз|в|до|за|около|примерно|пдф|pdf)(?![а-яё])",
+    re.I,
+)
+
+
 @dataclass
 class Query:
     complex_name: str
@@ -59,7 +66,7 @@ def parse_query(text: str) -> Query:
             price = value
             rest = rest[: m.start()] + " " + rest[m.end():]
 
-    name = re.sub(r"\b(жк|ЖК)\b", " ", rest)
+    name = _FILLER_RE.sub(" ", rest)
     name = re.sub(r"[«»\"',;]+", " ", name)
     name = " ".join(name.split())
     return Query(complex_name=name, price=price, area=area, rooms=rooms)

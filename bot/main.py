@@ -13,7 +13,7 @@ from .matching import pick_flats
 from .models import Flat
 from .pdf import build_pdf
 from .query import Query, parse_query
-from .trendagent import TrendAgentClient
+from .trendagent import LoginRequired, TrendAgentClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("bot")
@@ -100,6 +100,13 @@ async def search(message: Message) -> None:
     status = await message.answer(f"Ищу: {q.describe()}…")
     try:
         flats = await ta.search(q.complex_name)
+    except LoginRequired:
+        await status.edit_text(
+            "Бот не вошёл в TrendAgent. На компьютере откройте новое окно Терминала (Cmd+N) и выполните:\n"
+            "<code>cd ~/Desktop/planirovki && bash login.command</code>\n\n"
+            "Пока можно прислать скриншот планировки с подписью, например «Хай Лайф 30млн 30м2»."
+        )
+        return
     except Exception:
         log.exception("Ошибка поиска в TrendAgent")
         await status.edit_text("Не получилось зайти в TrendAgent или найти ЖК. Попробуйте ещё раз чуть позже.")

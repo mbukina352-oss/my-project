@@ -1,0 +1,12 @@
+#!/bin/bash
+# Обновление бота до последней версии (ваши .env, логотип и вход сохраняются)
+cd "$(dirname "$0")"
+URL="https://github.com/mbukina352-oss/my-project/archive/refs/heads/claude/trend-agent-planning-umwdo0.zip"
+TMP="$(mktemp -d)"
+curl -fsSL "$URL" -o "$TMP/bot.zip" && unzip -q "$TMP/bot.zip" -d "$TMP" || { echo "Не удалось скачать обновление"; exit 1; }
+SRC="$(ls -d "$TMP"/*/ | head -1)"
+rm -rf bot && cp -R "$SRC/bot" . \
+  && cp "$SRC"/requirements.txt "$SRC"/*.command "$SRC"/README.md "$SRC"/.env.example . \
+  && .venv/bin/pip install -q -r requirements.txt \
+  && echo "Бот обновлён. Запустите его заново: bash start.command"
+rm -rf "$TMP"
