@@ -14,5 +14,10 @@ if [ ! -f .env ]; then
   echo "Откроется TextEdit: впишите свои данные, сохраните (Cmd+S) и запустите start.command снова."
   open -e .env; exit 0
 fi
+if launchctl list 2>/dev/null | grep -q ru.planirovki.bot; then
+  echo "Бот уже работает в фоне (автозапуск включён), второй запускать не нужно."
+  echo "Журнал бота: tail -f data/bot.log     Выключить фон: bash autostart_off.command"
+  exit 0
+fi
 echo "Бот запущен. Не закрывайте это окно."
 .venv/bin/python -m bot.main

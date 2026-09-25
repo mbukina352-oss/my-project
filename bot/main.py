@@ -102,10 +102,12 @@ async def search(message: Message) -> None:
         block_name, flats = await ta.search(q.complex_name)
     except LoginRequired:
         await status.edit_text(
-            "Бот не вошёл в TrendAgent. На компьютере остановите бота (Control+C) и выполните:\n"
-            "<code>bash login.command</code>\n"
-            "Войдите в TrendAgent в открывшемся окне, вернитесь в Терминал, нажмите Enter "
-            "и снова запустите <code>bash start.command</code>."
+            "Бот не вошёл в TrendAgent. На компьютере откройте Терминал и выполните:\n"
+            "<code>cd ~/planirovki && bash login.command</code>\n"
+            "Войдите в TrendAgent в открывшемся окне, вернитесь в Терминал и нажмите Enter. "
+            "Бот подхватит вход сам.\n\n"
+            "Если бот запущен не в фоне, а в окне Терминала: сначала остановите его (Control+C), "
+            "а после входа снова запустите <code>bash start.command</code>."
         )
         return
     except NotFound as e:
