@@ -151,11 +151,27 @@ class TrendAgentClient:
         try:
             await page.goto(self.cfg.site_url, wait_until="domcontentloaded", timeout=90_000)
             try:
-                return await asyncio.wait_for(found, 30)
+                # Сайт может несколько раз перенаправить через sso.trend.tech, прежде чем
+                # сделать первый запрос к API, поэтому ждём с запасом
+                token = await asyncio.wait_for(found, 60)
             except asyncio.TimeoutError:
-                if "sso." in page.url or "login" in page.url:
+                url = page.url
+                log.warning("Нет ключа TrendAgent, страница: %s", url)
+                try:
+                    Path("data").mkdir(exist_ok=True)
+                    await page.screenshot(path="data/login_debug.png")
+                except Exception:
+                    pass
+                if "sso." in url or "/login" in url or "/oauth" in url:
                     raise LoginRequired()
-                raise RuntimeError(f"Не удалось получить ключ TrendAgent, страница: {page.url}")
+                raise RuntimeError(f"Не удалось получить ключ TrendAgent, страница: {url}")
+            # Сайт мог обновить cookie входа: сохраняем, чтобы после перезапуска бота вход не слетал
+            try:
+                await ctx.storage_state(path=self.cfg.state_file)
+                self._state_mtime = Path(self.cfg.state_file).stat().st_mtime
+            except Exception:
+                log.warning("Не удалось сохранить вход", exc_info=True)
+            return token
         finally:
             await page.close()
 
