@@ -12,6 +12,11 @@ def _env(name: str, default: str = "") -> str:
     return os.getenv(name, default).strip()
 
 
+def _font(name: str, *candidates: str) -> str:
+    """Шрифт с кириллицей: из .env или первый найденный в системе."""
+    return _env(name) or next((c for c in candidates if Path(c).is_file()), candidates[0])
+
+
 def _ids(value: str) -> set[int]:
     return {int(x) for x in value.replace(" ", "").split(",") if x}
 
@@ -54,8 +59,20 @@ class Settings:
     price_tolerance: float = float(_env("PRICE_TOLERANCE", "0.10"))
     area_tolerance: float = float(_env("AREA_TOLERANCE", "0.10"))
     max_results: int = int(_env("MAX_RESULTS", "3"))
-    font_path: str = _env("FONT_PATH", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
-    font_bold_path: str = _env("FONT_BOLD_PATH", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+    font_path: str = _font(
+        "FONT_PATH",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "C:/Windows/Fonts/arial.ttf",
+        "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "/Library/Fonts/Arial.ttf",
+    )
+    font_bold_path: str = _font(
+        "FONT_BOLD_PATH",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "C:/Windows/Fonts/arialbd.ttf",
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+        "/Library/Fonts/Arial Bold.ttf",
+    )
     agent: Agent = field(default_factory=Agent)
     trendagent: TrendAgent = field(default_factory=TrendAgent)
 

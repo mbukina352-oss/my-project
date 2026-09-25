@@ -7,6 +7,7 @@
 если TrendAgent их поменяет, достаточно поправить списки ключей.
 """
 import asyncio
+import base64
 import logging
 from pathlib import Path
 from typing import Any, Iterator
@@ -193,8 +194,26 @@ class TrendAgentClient:
             return
         ctx = await self._context()
         resp = await ctx.request.get(flat.plan_url)
-        if resp.ok:
-            flat.plan_image = await resp.body()
+        if not resp.ok:
+            return
+        data = await resp.body()
+        if data[:500].lstrip().lower().startswith((b"<svg", b"<?xml")):
+            data = await self._svg_to_png(ctx, data)
+        flat.plan_image = data
+
+    @staticmethod
+    async def _svg_to_png(ctx: BrowserContext, svg: bytes) -> bytes:
+        """Планировки часто в SVG: рисуем их в браузере и снимаем скриншот."""
+        page = await ctx.new_page()
+        try:
+            await page.set_content(
+                "<body style='margin:0;background:#fff'>"
+                "<img id=p style='width:2000px' src='data:image/svg+xml;base64,"
+                + base64.b64encode(svg).decode() + "'></body>"
+            )
+            return await page.locator("#p").screenshot(type="png")
+        finally:
+            await page.close()
 
     async def close(self) -> None:
         if self._browser:

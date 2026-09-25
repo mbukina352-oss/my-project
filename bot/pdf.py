@@ -40,15 +40,6 @@ def _fit(text: str, font: str, size: float, width: float) -> str:
     return text
 
 
-def _load_image(data: bytes) -> Image.Image:
-    head = data[:500].lstrip().lower()
-    if head.startswith(b"<svg") or head.startswith(b"<?xml"):
-        import cairosvg  # планировки на сайтах часто в SVG
-
-        data = cairosvg.svg2png(bytestring=data, output_width=2000)
-    return Image.open(io.BytesIO(data))
-
-
 def _header(c: canvas.Canvas, agent: Agent, w: float, h: float) -> float:
     bar = 64
     c.setFillColor(ACCENT)
@@ -141,7 +132,7 @@ def _page(c: canvas.Canvas, flat: Flat, agent: Agent) -> None:
         c.line(MARGIN, y + 6, w - MARGIN, y + 6)
 
     if flat.plan_image:
-        img = _load_image(flat.plan_image)
+        img = Image.open(io.BytesIO(flat.plan_image))
         if img.mode not in ("RGB", "L"):
             bg = Image.new("RGB", img.size, "white")
             bg.paste(img, mask=img.convert("RGBA").split()[-1])
