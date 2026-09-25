@@ -1,0 +1,7 @@
+aiogram==3.13.1
+playwright==1.47.0
+reportlab>=4.2
+pillow>=10.4
+pypdfium2>=4.30
+cairosvg>=2.7
+python-dotenv>=1.0
