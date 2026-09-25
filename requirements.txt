@@ -1,5 +1,5 @@
-aiogram==3.13.1
-playwright==1.47.0
+aiogram>=3.13,<4
+playwright>=1.47
 reportlab>=4.2
 pillow>=10.4
 pypdfium2>=4.30
