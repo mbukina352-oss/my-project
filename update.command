@@ -1,7 +1,7 @@
 #!/bin/bash
 # Обновление бота до последней версии (ваши .env, логотип и вход сохраняются)
 cd "$(dirname "$0")"
-URL="https://github.com/mbukina352-oss/my-project/archive/refs/heads/claude/trend-agent-planning-umwdo0.zip"
+URL="https://codeload.github.com/mbukina352-oss/my-project/zip/refs/heads/claude/trend-agent-planning-umwdo0"
 TMP="$(mktemp -d)"
 curl -fsSL --retry 8 --retry-all-errors --retry-delay 3 "$URL" -o "$TMP/bot.zip" && unzip -q "$TMP/bot.zip" -d "$TMP" || { echo "Не удалось скачать обновление"; exit 1; }
 SRC="$(ls -d "$TMP"/*/ | head -1)"

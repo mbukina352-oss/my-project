@@ -21,7 +21,29 @@ log = logging.getLogger(__name__)
 
 API = "https://api.trendagent.ru/v4_29"
 IMAGES = "https://selcdn.trendagent.ru/images/"
+PRESENTATION = "https://presentations.trendagent.ru/v3/presentations/download/apartment/"
 BLOCKS_TTL = 6 * 3600
+
+# Те же галочки, что ставит сайт при скачивании презентации квартиры
+_ON = (
+    "block_name builder_name block_address plan floor_plan apartment_passport finishings "
+    "additional_finishings cardinals block_passport deadline block_renderers pano block_progress "
+    "block_advantage_and_desc apartment_secondary_promo_text parking_floor_plan video_show_room "
+    "apartment_discounts parking_place_passport parking_on_map parking_passport parking_deadline "
+    "commerce_plan commerce_floor_plan commerce_description commerce_images "
+    "commercial_premise_passport commerce_promo_text commerce_conditions commerce_on_map "
+    "passport_commercial_building commerce_deadline_key commerce_deadline commerce_mortgage_calc "
+    "commerce_mortgage_programs"
+)
+_OFF = (
+    "deadline_keys apartment_metrica similar_apartments mortgage_calc mortgage_programms "
+    "installment_calc installment_programms whatsapp"
+)
+PRESENTATION_PARAMS = {
+    **{f"show_{k}": "true" for k in _ON.split()},
+    **{f"show_{k}": "false" for k in _OFF.split()},
+    "currency": "rub", "lang": "ru", "measurement": "metric",
+}
 
 FINISHING = {
     0: "Без отделки", 1: "Чистовая", 2: "Подчистовая", 4: "С мебелью",
@@ -68,6 +90,7 @@ def parse_block_apartments(payload: dict, block_name: str = "", address: str = "
                     continue
                 rooms, euro = rooms_from_code(int(a.get("rooms", -1)))
                 flats.append(Flat(
+                    id=str(a.get("_id", "")),
                     complex_name=block_name,
                     address=address,
                     building=" ".join(str(a.get("building_name", "")).split()),
@@ -136,15 +159,13 @@ class TrendAgentClient:
         finally:
             await page.close()
 
-    async def _api(self, path: str, **params) -> dict:
+    async def _get(self, url: str, params: dict):
+        """GET с auth_token; при 401/403 один раз обновляет ключ."""
         ctx = await self._context()
         for attempt in range(2):
             if not self._token:
                 self._token = await self._fetch_token()
-            resp = await ctx.request.get(
-                API + path,
-                params={**params, "auth_token": self._token, "city": self.cfg.city_id, "lang": "ru"},
-            )
+            resp = await ctx.request.get(url, params={**params, "auth_token": self._token}, timeout=120_000)
             if resp.status in (401, 403) and attempt == 0:
                 log.info("Ключ TrendAgent устарел, обновляю")
                 self._token = ""
@@ -152,9 +173,21 @@ class TrendAgentClient:
             if resp.status in (401, 403):
                 raise LoginRequired()
             if not resp.ok:
-                raise RuntimeError(f"TrendAgent {path}: HTTP {resp.status}")
-            return await resp.json()
+                raise RuntimeError(f"TrendAgent {url}: HTTP {resp.status}")
+            return resp
         raise LoginRequired()
+
+    async def _api(self, path: str, **params) -> dict:
+        resp = await self._get(API + path, {**params, "city": self.cfg.city_id, "lang": "ru"})
+        return await resp.json()
+
+    async def presentation(self, flat: Flat) -> bytes:
+        """Готовая презентация квартиры от TrendAgent (PDF с данными из вашего профиля)."""
+        resp = await self._get(PRESENTATION + flat.id, PRESENTATION_PARAMS)
+        data = await resp.body()
+        if not data.startswith(b"%PDF"):
+            raise RuntimeError(f"TrendAgent вернул не PDF для квартиры {flat.id}")
+        return data
 
     async def _all_blocks(self) -> list[dict]:
         if not self._blocks or time.time() - self._blocks_at > BLOCKS_TTL:

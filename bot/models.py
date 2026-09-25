@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Flat:
+    id: str = ""  # _id квартиры в TrendAgent
     complex_name: str = ""
     address: str = ""
     building: str = ""

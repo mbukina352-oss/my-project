@@ -26,7 +26,7 @@ HELP = (
     "<code>Джойс 35млн 60м2</code>\n"
     "<code>Level Мичуринский 2к 25 млн</code>\n"
     "<code>Шагал студия 30м2</code>\n\n"
-    "Я найду подходящие квартиры в TrendAgent и пришлю PDF с планировками и вашими контактами.\n\n"
+    "Я найду подходящие квартиры в TrendAgent и пришлю их презентации TrendAgent с вашими контактами.\n\n"
     "Если нужна конкретная планировка, пришлите её картинкой или PDF, а в подписи напишите "
     "ЖК, цену и площадь. Я оформлю её в ваш PDF."
 )
@@ -128,22 +128,44 @@ async def search(message: Message) -> None:
         await status.edit_text(f"В ЖК «{block_name}» сейчас нет свободных квартир с планировками.")
         return
 
-    await asyncio.gather(*(ta.download(f) for f in found))
-    found = [f for f in found if f.plan_image]
-    if not found:
-        await status.edit_text("Квартиры нашёл, но не смог скачать планировки.")
-        return
+    await status.edit_text(f"ЖК «{block_name}»: нашёл {len(found)}, готовлю презентации…")
+    if note:
+        await message.answer(note.strip())
+    sent = 0
+    for f in found:
+        line = flat_line(f)
+        try:
+            pdf = await ta.presentation(f)
+        except Exception:
+            log.warning("Презентация TrendAgent не скачалась, делаю свою", exc_info=True)
+            pdf = await own_pdf(f)
+        if pdf:
+            await message.answer_document(BufferedInputFile(pdf, flat_file_name(block_name, f)),
+                                          caption=f"ЖК «{block_name}»\n{line}")
+            sent += 1
+    if sent:
+        await status.delete()
+    else:
+        await status.edit_text("Квартиры нашёл, но не смог получить презентации. Попробуйте ещё раз.")
 
-    pdf = make_pdf(found)
-    lines = [
-        f"• {f.rooms_label} {f.area:g} м²".replace(".", ",")
-        + f", {f.floor} эт., " + f"{f.price:,} ₽".replace(",", " ")
-        for f in found
-    ]
-    q.complex_name = block_name
-    caption = f"ЖК «{block_name}»\n" + note + "\n".join(lines)
-    await message.answer_document(BufferedInputFile(pdf, file_name(q)), caption=caption[:1000])
-    await status.delete()
+
+def flat_line(f: Flat) -> str:
+    parts = [f.rooms_label, f"{f.area:g} м²".replace(".", ",") if f.area else "",
+             f"{f.floor} эт." if f.floor else "", f"{f.price:,} ₽".replace(",", " ") if f.price else "",
+             f.building]
+    return ", ".join(p for p in parts if p)
+
+
+def flat_file_name(block_name: str, f: Flat) -> str:
+    area = f"{f.area:g}".replace(".", ",") if f.area else ""
+    name = f"{block_name} {f.rooms_label} {area}м2 эт{f.floor}" if area else block_name
+    return "".join(ch if ch.isalnum() or ch in " -_," else "_" for ch in name).strip() + ".pdf"
+
+
+async def own_pdf(f: Flat) -> bytes | None:
+    """Запасной вариант: своя PDF с планировкой, если TrendAgent не отдал презентацию."""
+    await ta.download(f)
+    return make_pdf([f]) if f.plan_image else None
 
 
 async def main() -> None:

@@ -93,3 +93,38 @@ def test_build_pdf(tmp_path):
     pdf = build_pdf(flats, agent, FONT, FONT_BOLD)
     assert pdf.startswith(b"%PDF")
     assert pdf.count(b"/Type /Page\n") + pdf.count(b"/Type /Page ") >= 1
+
+
+def test_search_sends_trendagent_presentations(monkeypatch):
+    import asyncio
+    from unittest.mock import AsyncMock, MagicMock
+
+    import bot.main as m
+
+    flats = [Flat(id="a1", rooms=2, euro=True, area=49.8, floor="10", price=54_151_524,
+                  building="5 Mind Tower", plan_url="u1"),
+             Flat(id="a2", rooms=2, area=51, floor="5", price=50_000_000, plan_url="u2")]
+
+    async def presentation(f):
+        if f.id == "a2":
+            raise RuntimeError("нет презентации")
+        return b"%PDF-trendagent"
+
+    async def download(f):
+        f.plan_image = _plan_png()
+
+    monkeypatch.setattr(m.ta, "search", AsyncMock(return_value=("HIGH LIFE", flats)))
+    monkeypatch.setattr(m.ta, "presentation", presentation)
+    monkeypatch.setattr(m.ta, "download", download)
+
+    message = MagicMock()
+    message.text = "хай лайф 2к 50м2"
+    message.answer = AsyncMock(return_value=MagicMock(edit_text=AsyncMock(), delete=AsyncMock()))
+    message.answer_document = AsyncMock()
+    asyncio.run(m.search(message))
+
+    docs = [c.args[0] for c in message.answer_document.call_args_list]
+    assert len(docs) == 2
+    assert docs[0].data == b"%PDF-trendagent"          # презентация TrendAgent как есть
+    assert docs[1].data.startswith(b"%PDF") and docs[1].data != b"%PDF-trendagent"  # запасная своя
+    assert docs[0].filename == "HIGH LIFE Евро-2 49,8м2 эт10.pdf"
