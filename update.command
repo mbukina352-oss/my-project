@@ -3,7 +3,7 @@
 cd "$(dirname "$0")"
 URL="https://github.com/mbukina352-oss/my-project/archive/refs/heads/claude/trend-agent-planning-umwdo0.zip"
 TMP="$(mktemp -d)"
-curl -fsSL "$URL" -o "$TMP/bot.zip" && unzip -q "$TMP/bot.zip" -d "$TMP" || { echo "Не удалось скачать обновление"; exit 1; }
+curl -fsSL --retry 8 --retry-all-errors --retry-delay 3 "$URL" -o "$TMP/bot.zip" && unzip -q "$TMP/bot.zip" -d "$TMP" || { echo "Не удалось скачать обновление"; exit 1; }
 SRC="$(ls -d "$TMP"/*/ | head -1)"
 rm -rf bot && cp -R "$SRC/bot" . \
   && cp "$SRC"/requirements.txt "$SRC"/*.command "$SRC"/README.md "$SRC"/.env.example . \
