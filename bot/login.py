@@ -13,7 +13,6 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 from .config import settings
-from .trendagent import extract_flats
 
 CAPTURE = Path("data/capture.json")
 MAX_BODY = 300_000  # символов на один ответ
@@ -69,24 +68,16 @@ async def main() -> None:
         await ctx.storage_state(path=str(state))
         await browser.close()
 
-    flats = sum(len(extract_flats(_json(r["body"]), r["url"])) for r in records)
     CAPTURE.write_text(
         json.dumps({"pages": pages, "responses": records}, ensure_ascii=False, indent=1),
         encoding="utf-8",
     )
     print()
     print("Готово! Вход сохранён, бот будет заходить в TrendAgent сам.")
-    print(f"Сохранено ответов сайта: {len(records)}, похожих на квартиры: {flats}.")
+    print(f"Сохранено ответов сайта: {len(records)}.")
     print(f"Файл для настройки поиска: {CAPTURE.resolve()}")
     if sys.platform == "darwin":
         subprocess.run(["open", "-R", str(CAPTURE)])
-
-
-def _json(body: str):
-    try:
-        return json.loads(body)
-    except ValueError:
-        return None
 
 
 if __name__ == "__main__":

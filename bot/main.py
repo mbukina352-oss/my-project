@@ -9,11 +9,11 @@ from aiogram.filters import Command, CommandStart
 from aiogram.types import BufferedInputFile, Message
 
 from .config import settings
-from .matching import pick_flats
+from .matching import closest_flats, pick_flats
 from .models import Flat
 from .pdf import build_pdf
 from .query import Query, parse_query
-from .trendagent import LoginRequired, TrendAgentClient
+from .trendagent import LoginRequired, NotFound, TrendAgentClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("bot")
@@ -99,25 +99,33 @@ async def search(message: Message) -> None:
         return
     status = await message.answer(f"Ищу: {q.describe()}…")
     try:
-        flats = await ta.search(q.complex_name)
+        block_name, flats = await ta.search(q.complex_name)
     except LoginRequired:
         await status.edit_text(
-            "Бот не вошёл в TrendAgent. На компьютере откройте новое окно Терминала (Cmd+N) и выполните:\n"
-            "<code>cd ~/Desktop/planirovki && bash login.command</code>\n\n"
-            "Пока можно прислать скриншот планировки с подписью, например «Хай Лайф 30млн 30м2»."
+            "Бот не вошёл в TrendAgent. На компьютере остановите бота (Control+C) и выполните:\n"
+            "<code>bash login.command</code>\n"
+            "Войдите в TrendAgent в открывшемся окне, вернитесь в Терминал, нажмите Enter "
+            "и снова запустите <code>bash start.command</code>."
         )
+        return
+    except NotFound as e:
+        if e.suggestions:
+            await status.edit_text("Не понял, какой ЖК. Может быть: " + ", ".join(e.suggestions) + "?")
+        else:
+            await status.edit_text(f"Не нашёл ЖК «{q.complex_name}» в TrendAgent (Москва).")
         return
     except Exception:
         log.exception("Ошибка поиска в TrendAgent")
-        await status.edit_text("Не получилось зайти в TrendAgent или найти ЖК. Попробуйте ещё раз чуть позже.")
+        await status.edit_text("TrendAgent не ответил. Попробуйте ещё раз через минуту.")
         return
 
+    note = ""
     found = pick_flats(flats, q, settings.price_tolerance, settings.area_tolerance, settings.max_results)
     if not found:
-        await status.edit_text(
-            f"В ЖК «{q.complex_name}» не нашёл квартир под запрос ({q.describe()}). "
-            f"Всего квартир в выдаче: {len(flats)}. Попробуйте изменить цену или площадь."
-        )
+        found = closest_flats(flats, q, settings.max_results)
+        note = "Точно под запрос нет, вот ближайшие варианты:\n"
+    if not found:
+        await status.edit_text(f"В ЖК «{block_name}» сейчас нет свободных квартир с планировками.")
         return
 
     await asyncio.gather(*(ta.download(f) for f in found))
@@ -132,7 +140,9 @@ async def search(message: Message) -> None:
         + f", {f.floor} эт., " + f"{f.price:,} ₽".replace(",", " ")
         for f in found
     ]
-    await message.answer_document(BufferedInputFile(pdf, file_name(q)), caption="\n".join(lines)[:1000])
+    q.complex_name = block_name
+    caption = f"ЖК «{block_name}»\n" + note + "\n".join(lines)
+    await message.answer_document(BufferedInputFile(pdf, file_name(q)), caption=caption[:1000])
     await status.delete()
 
 

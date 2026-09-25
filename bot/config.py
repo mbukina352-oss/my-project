@@ -39,17 +39,9 @@ class Agent:
 
 @dataclass(frozen=True)
 class TrendAgent:
-    login: str = _env("TA_LOGIN")
-    password: str = _env("TA_PASSWORD")
-    city: str = _env("TA_CITY", "msk")
-    login_url: str = _env("TA_LOGIN_URL", "https://sso.trendagent.ru/login")
-    # {query} подставляется в URL поиска по названию ЖК
-    search_url: str = _env("TA_SEARCH_URL", "https://msk.trendagent.ru/objects/list/?search={query}")
-    phone_selector: str = _env("TA_PHONE_SELECTOR", "input[name=phone], input[type=tel], input[name=login]")
-    password_selector: str = _env("TA_PASSWORD_SELECTOR", "input[type=password]")
-    submit_selector: str = _env("TA_SUBMIT_SELECTOR", "button[type=submit]")
+    site_url: str = _env("TA_SITE_URL", "https://msk.trendagent.ru/")
+    city_id: str = _env("TA_CITY_ID", "5a5cb42159042faa9a218d04")  # Москва
     state_file: str = _env("TA_STATE_FILE", "data/trendagent_state.json")
-    headless: bool = _env("TA_HEADLESS", "1") != "0"
 
 
 @dataclass(frozen=True)

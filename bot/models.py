@@ -7,6 +7,7 @@ class Flat:
     address: str = ""
     building: str = ""
     rooms: int | None = None  # 0 = студия
+    euro: bool = False  # евро-планировка (кухня-гостиная)
     area: float | None = None
     floor: str = ""
     price: int | None = None
@@ -19,4 +20,6 @@ class Flat:
     def rooms_label(self) -> str:
         if self.rooms is None:
             return ""
-        return "Студия" if self.rooms == 0 else f"{self.rooms}-комнатная"
+        if self.rooms == 0:
+            return "Студия"
+        return f"Евро-{self.rooms}" if self.euro else f"{self.rooms}-комнатная"

@@ -22,3 +22,8 @@ def pick_flats(flats: list[Flat], q: Query, price_tol: float, area_tol: float, l
         return d
 
     return sorted(filter(fits, flats), key=distance)[:limit]
+
+
+def closest_flats(flats: list[Flat], q: Query, limit: int) -> list[Flat]:
+    """Запасной вариант, когда под допуски ничего не подошло: просто ближайшие."""
+    return pick_flats(flats, q, price_tol=10**6, area_tol=10**6, limit=limit)

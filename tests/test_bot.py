@@ -8,7 +8,8 @@ from bot.matching import pick_flats
 from bot.models import Flat
 from bot.pdf import build_pdf
 from bot.query import parse_query
-from bot.trendagent import extract_flats
+from bot.names import find_blocks
+from bot.trendagent import parse_block_apartments
 
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -28,17 +29,37 @@ def test_parse_query(text, name, price, area, rooms):
     assert (q.complex_name, q.price, q.area, q.rooms) == (name, price, area, rooms)
 
 
-def test_extract_flats_from_json():
-    payload = {"data": {"apartments": [
-        {"block_name": "Джойс", "price": 34_900_000, "area_total": 59.8, "room": 2, "floor": 12,
-         "plan": {"url": "/media/plan1.png"}, "building": {"name": "Корпус 1"}},
-        {"name": "not a flat", "price": 100},
-    ]}}
-    flats = extract_flats(payload, "https://msk.trendagent.ru/objects/")
-    assert len(flats) == 1
-    f = flats[0]
-    assert f.plan_url == "https://msk.trendagent.ru/media/plan1.png"
-    assert (f.complex_name, f.rooms, f.area, f.building) == ("Джойс", 2, 59.8, "Корпус 1")
+def test_parse_block_apartments():
+    # Урезанный ответ /v4_29/apartments/block/<id>/search/
+    payload = {"data": {"results": {"2#4 кв. 2027": [{"apartments": [
+        {"plan": {"path": "o/h/", "file_name": "plan.png"}, "status": {"name": "Свободная (акция)"},
+         "floor": 5, "price": 28417518, "rooms": 0, "privArea": 25.7, "deadline": "4 кв. 2027",
+         "building_name": "5  Mind Tower", "finishing_id": 1},
+        {"plan": {"path": "a/b/", "file_name": "e2.png"}, "status": {"name": "Свободная"},
+         "floor": 18, "price": 52092096, "rooms": 22, "privArea": 50.9, "finishing_id": 2},
+        {"plan": {"path": "a/b/", "file_name": "x.png"}, "status": {"name": "Бронь"},
+         "floor": 3, "price": 1, "rooms": 1, "privArea": 40},
+    ]}]}}}
+    flats = parse_block_apartments(payload, "HIGH LIFE", "ул Летниковская")
+    assert len(flats) == 2  # бронь пропущена
+    studio, euro = flats
+    assert studio.plan_url == "https://selcdn.trendagent.ru/images/o/h/plan.png"
+    assert (studio.rooms_label, studio.area, studio.building, studio.finishing) == (
+        "Студия", 25.7, "5 Mind Tower", "Чистовая")
+    assert (euro.rooms, euro.euro, euro.rooms_label) == (2, True, "Евро-2")
+
+
+BLOCKS = [{"name": "HIGH LIFE", "guid": "high-life"}, {"name": "Джойс", "guid": "jois"},
+          {"name": "Инджой", "guid": "injoy"}, {"name": "Dream Towers", "guid": "dream-towers"},
+          {"name": "ЗилАрт", "guid": "zilart"}, {"name": "ВОЙС", "guid": "voice"}]
+
+
+@pytest.mark.parametrize("query,expected", [
+    ("хай лайф", "HIGH LIFE"), ("High Life", "HIGH LIFE"), ("джойс", "Джойс"),
+    ("дрим тауэрс", "Dream Towers"), ("зил арт", "ЗилАрт"), ("инджой", "Инджой"),
+])
+def test_find_blocks(query, expected):
+    assert find_blocks(query, BLOCKS)[0][1]["name"] == expected
 
 
 def test_pick_flats_closest_first():
