@@ -141,7 +141,11 @@ async def main() -> None:
             ctx.on("response", on_other_response)
             ctx.on("page", watch)
             page = await ctx.new_page()
-            await page.goto(cfg.site_url)
+            try:
+                # Сайт тяжёлый и может грузиться долго: не ждём полной загрузки
+                await page.goto(cfg.site_url, wait_until="domcontentloaded", timeout=90_000)
+            except BaseException as e:  # noqa: BLE001 — окно всё равно открыто, можно работать
+                errors.append(f"goto: {e!r}")
 
             print()
             print("Открылось окно браузера. В нём:")

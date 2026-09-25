@@ -126,7 +126,7 @@ class TrendAgentClient:
 
         page.on("request", on_request)
         try:
-            await page.goto(self.cfg.site_url, wait_until="domcontentloaded")
+            await page.goto(self.cfg.site_url, wait_until="domcontentloaded", timeout=90_000)
             try:
                 return await asyncio.wait_for(found, 30)
             except asyncio.TimeoutError:
