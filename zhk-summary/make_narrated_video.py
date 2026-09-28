@@ -19,7 +19,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ZHK_summary_voic
 PAUSE = 0.35
 THINK = 3.0
 TEMPO = 1.15  # чуть быстрее стандартного темпа RHVoice
-SLIDE_W, SLIDE_H = 1600, 900
+
 
 INTRO = [
     "Привет! Сейчас за несколько минут разберём четыре новостройки Москвы.",
@@ -166,80 +166,226 @@ def plan():
     return items
 
 
-def draw_avatar(d, x, y, r, color):
-    d.ellipse([x - r, y - r, x + r, y + r], fill=color)
-    d.ellipse([x - r * 0.32, y - r * 0.62, x + r * 0.32, y + r * 0.02], fill=mv.BG)
-    d.chord([x - r * 0.62, y + r * 0.12, x + r * 0.62, y + r * 1.2], 180, 360, fill=mv.BG)
+# ---------- ведущий ----------
+
+SPRITE_W, SPRITE_H = 560, 1080
+SPRITE_X = mv.W - SPRITE_W + 20
+SKIN = (240, 200, 170)
+SKIN_D = (205, 155, 125)
+HAIR = (62, 42, 32)
+SUIT = (38, 52, 92)
+SUIT_D = (28, 38, 70)
+TIE = (150, 110, 255)
+K = 2  # рисуем в 2x и уменьшаем для сглаживания
+
+
+def presenter(mouth, blink, point, look):
+    img = Image.new("RGBA", (SPRITE_W * K, SPRITE_H * K), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+
+    def P(*pts):
+        return [v * K for v in pts]
+
+    def Q(*pts):
+        return [(v + 55 if i % 2 else v) * K for i, v in enumerate(pts)]
+
+    cx = 330
+    # рука, указывающая на слайд (рисуется за корпусом)
+    if point:
+        d.line(P(cx - 150, 760, cx - 250, 690, 70, 560), fill=SUIT, width=72 * K, joint="curve")
+        d.ellipse(P(cx - 186, 724, cx - 114, 796), fill=SUIT)
+        d.ellipse(P(70 - 36, 560 - 36, 70 + 36, 560 + 36), fill=SUIT)
+        d.line(P(58, 545, 30, 520), fill=(245, 245, 250), width=26 * K)
+        d.ellipse(P(0, 478, 56, 530), fill=SKIN)
+        d.rounded_rectangle(P(-40, 488, 20, 504), 8 * K, fill=SKIN)
+    # корпус
+    d.ellipse(P(cx - 210, 660, cx + 210, 900), fill=SUIT)
+    d.rectangle(P(cx - 210, 780, cx + 210, SPRITE_H), fill=SUIT)
+    d.polygon(P(cx - 55, 690, cx + 55, 690, cx, 830), fill=(245, 245, 250))
+    d.polygon(P(cx - 11, 708, cx + 11, 708, cx + 18, 800, cx, 835, cx - 18, 800), fill=TIE)
+    d.polygon(P(cx - 60, 688, cx, 835, cx - 90, 760), fill=SUIT_D)
+    d.polygon(P(cx + 60, 688, cx, 835, cx + 90, 760), fill=SUIT_D)
+    # шея
+    d.rectangle(P(cx - 36, 610, cx + 36, 700), fill=SKIN)
+    d.ellipse(P(cx - 36, 660, cx + 36, 712), fill=SKIN_D)
+    # голова
+    d.ellipse(Q(cx - 118, 283, cx + 118, 455), fill=HAIR)
+    d.ellipse(Q(cx - 127, 420, cx - 97, 482), fill=SKIN)
+    d.ellipse(Q(cx + 97, 420, cx + 127, 482), fill=SKIN)
+    d.ellipse(Q(cx - 105, 330, cx + 105, 592), fill=SKIN)
+    d.pieslice(Q(cx - 112, 290, cx + 112, 440), 185, 355, fill=HAIR)
+    d.polygon(Q(cx - 100, 370, cx - 30, 330, cx + 60, 352, cx + 104, 395, cx + 108, 340, cx - 108, 345), fill=HAIR)
+    # брови
+    by = -5 if mouth >= 3 else 0
+    d.line(Q(cx - 68, 410 + by, cx - 28, 403 + by), fill=HAIR, width=8 * K)
+    d.line(Q(cx + 28, 403 + by, cx + 68, 410 + by), fill=HAIR, width=8 * K)
+    # глаза
+    for ex in (cx - 48, cx + 48):
+        if blink:
+            d.line(Q(ex - 19, 440, ex + 19, 440), fill=(60, 40, 40), width=5 * K)
+        else:
+            d.ellipse(Q(ex - 20, 426, ex + 20, 454), fill=(255, 255, 255))
+            px = ex + look
+            d.ellipse(Q(px - 10, 430, px + 10, 450), fill=(70, 50, 40))
+            d.ellipse(Q(px - 5, 435, px + 5, 445), fill=(15, 15, 20))
+            d.ellipse(Q(px - 5, 432, px - 1, 436), fill=(255, 255, 255))
+    # нос и румянец
+    d.line(Q(cx + 2, 452, cx - 8, 496, cx + 8, 500), fill=SKIN_D, width=5 * K, joint="curve")
+    d.ellipse(Q(cx - 88, 485, cx - 52, 510), fill=(245, 180, 160))
+    d.ellipse(Q(cx + 52, 485, cx + 88, 510), fill=(245, 180, 160))
+    # рот
+    my = 540
+    if mouth == 0:
+        d.arc(Q(cx - 26, my - 20, cx + 26, my + 6), 20, 160, fill=(150, 60, 60), width=6 * K)
+    else:
+        w, h = 22 + 2 * mouth, 4 + 6 * mouth
+        d.ellipse(Q(cx - w, my - h, cx + w, my + h), fill=(95, 30, 40))
+        if mouth >= 2:
+            d.chord(Q(cx - w + 4, my - h + 1, cx + w - 4, my - h + 14), 0, 180, fill=(255, 255, 255))
+            d.ellipse(Q(cx - w / 2, my + h - 12, cx + w / 2, my + h - 1), fill=(220, 110, 120))
+    return img.resize((SPRITE_W, SPRITE_H), Image.LANCZOS)
+
+
+_cache = {}
+
+
+def sprite(*state):
+    if state not in _cache:
+        _cache[state] = presenter(*state)
+    return _cache[state]
+
+
+# ---------- кадр ----------
+
+SLIDE_W, SLIDE_H = 1400, 788
+SX, SY = 30, 30
+SUB_Y = 848
 
 
 def compose(slide, text):
     img = Image.new("RGB", (mv.W, mv.H), mv.BG)
-    img.paste(slide.resize((SLIDE_W, SLIDE_H), Image.LANCZOS), ((mv.W - SLIDE_W) // 2, 0))
     d = ImageDraw.Draw(img)
-    d.rectangle([0, SLIDE_H, mv.W, mv.H], fill=mv.CARD)
-    draw_avatar(d, 95, SLIDE_H + 90, 58, (150, 110, 255))
-    d.text((95, SLIDE_H + 165), "рассказчик", font=mv.f(18), fill=mv.MUTED, anchor="mm")
-    font = mv.f(36, True)
+    # «студия» за ведущим
+    glow = Image.new("RGB", (mv.W, mv.H), mv.BG)
+    gd = ImageDraw.Draw(glow)
+    for i in range(24):
+        c = tuple(int(a + (b - a) * i / 23) for a, b in zip((44, 38, 80), mv.BG))
+        r = 460 - i * 12
+        gd.ellipse([1690 - r, 500 - r, 1690 + r, 500 + r], fill=c)
+    img.paste(glow.crop((SX + SLIDE_W + 20, 0, mv.W, mv.H)), (SX + SLIDE_W + 20, 0))
+    img.paste(slide.resize((SLIDE_W, SLIDE_H), Image.LANCZOS), (SX, SY))
+    d.rounded_rectangle([SX, SUB_Y, SX + SLIDE_W, mv.H - 30], 22, fill=mv.CARD)
+    font = mv.f(34, True)
     words, lines, cur = text.split(), [], ""
     for w in words:
         test = (cur + " " + w).strip()
-        if d.textlength(test, font=font) <= 1380:
+        if d.textlength(test, font=font) <= SLIDE_W - 80:
             cur = test
         else:
             lines.append(cur)
             cur = w
     lines.append(cur)
-    lh = 48
-    y0 = SLIDE_H + 90 - (len(lines) - 1) * lh / 2
+    lh = 46
+    cy = (SUB_Y + mv.H - 30) / 2
+    y0 = cy - (len(lines) - 1) * lh / 2
     for i, ln in enumerate(lines):
-        d.text((470, y0 + i * lh), ln, font=font, fill=mv.TEXT, anchor="lm")
+        d.text((SX + 40, y0 + i * lh), ln, font=font, fill=mv.TEXT, anchor="lm")
     return img
 
 
-def wav_len(path):
-    with wave.open(path) as w:
-        return w.getnframes() / w.getframerate()
+def nameplate(img):
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([1480, 960, 1890, 1040], 18, fill=TIE)
+    d.text((1685, 1000), "Гид по новостройкам", font=mv.f(28, True), fill=mv.BG, anchor="mm")
 
+
+# ---------- сборка ----------
 
 def build():
+    import array
+    import math
+    import random
+
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    fps, sr = 25, 24000
     items = plan()
     total = len(items)
+    phrases, pcm = [], array.array("h")
     with tempfile.TemporaryDirectory() as tmp:
-        clips, secs = [], 0.0
         for si, (slide, lines) in enumerate(items, 1):
             mv.footer(ImageDraw.Draw(slide), si, total)
             for li, line in enumerate(lines):
-                base = os.path.join(tmp, f"{si:03}_{li:02}")
-                wav = base + ".wav"
+                raw, out = os.path.join(tmp, "raw.wav"), os.path.join(tmp, "out.wav")
                 if line is None:
-                    subtitle, dur = "…подумайте…", THINK
+                    n = int(THINK * fps)
                     subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-f", "lavfi", "-i",
-                                    "anullsrc=r=24000:cl=mono", "-t", str(THINK), wav], check=True)
+                                    f"anullsrc=r={sr}:cl=mono", "-t", str(n / fps),
+                                    "-c:a", "pcm_s16le", out], check=True)
+                    text = "…подумайте…"
                 else:
-                    subtitle = line
-                    subprocess.run(["RHVoice-test", "-p", VOICE, "-o", wav],
+                    subprocess.run(["RHVoice-test", "-p", VOICE, "-o", raw],
                                    input=line.encode(), check=True, capture_output=True)
-                    dur = wav_len(wav) / TEMPO + PAUSE
-                compose(slide, subtitle).save(base + ".png")
-                tempo = f"atempo={TEMPO}," if line is not None else ""
-                fc = (f"[1:a]{tempo}apad,atrim=0:{dur:.3f},aresample=44100,asplit[a1][a2];"
-                      f"[a2]showwaves=s=260x120:mode=cline:scale=sqrt:draw=full:rate={mv.FPS}:colors=0xc4b0ff[w];"
-                      f"[0:v][w]overlay=185:{SLIDE_H + 30},format=yuv420p[v]")
-                subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-loop", "1", "-framerate", str(mv.FPS),
-                                "-i", base + ".png", "-i", wav, "-filter_complex", fc,
-                                "-map", "[v]", "-map", "[a1]", "-t", f"{dur:.3f}",
-                                "-c:v", "libx264", "-preset", "medium", "-crf", "21",
-                                "-c:a", "aac", "-b:a", "128k", "-ac", "1", base + ".mp4"], check=True)
-                clips.append(base + ".mp4")
-                secs += dur
-            print(f"слайд {si}/{total}", flush=True)
-        lst = os.path.join(tmp, "list.txt")
-        with open(lst, "w") as fh:
-            fh.writelines(f"file '{c}'\n" for c in clips)
-        subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", lst,
-                        "-c", "copy", "-movflags", "+faststart", OUT], check=True)
-    print(f"{OUT}: {len(clips)} фраз, ~{secs / 60:.1f} мин")
+                    with wave.open(raw) as w:
+                        dur = w.getnframes() / w.getframerate() / TEMPO + PAUSE
+                    n = round(dur * fps)
+                    subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-i", raw, "-af",
+                                    f"atempo={TEMPO},apad,atrim=0:{n / fps:.4f}", "-ar", str(sr),
+                                    "-ac", "1", "-c:a", "pcm_s16le", out], check=True)
+                    text = line
+                with wave.open(out) as w:
+                    chunk = array.array("h", w.readframes(w.getnframes()))
+                need = n * sr // fps
+                chunk = chunk[:need] + array.array("h", [0] * max(0, need - len(chunk)))
+                pcm.extend(chunk)
+                base = compose(slide, text)
+                nameplate(base)
+                phrases.append((base, n, li == 0))
+            print(f"озвучка: слайд {si}/{total}", flush=True)
+
+        audio = os.path.join(tmp, "voice.wav")
+        with wave.open(audio, "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(sr)
+            w.writeframes(pcm.tobytes())
+
+        spf = sr // fps
+        nframes = len(pcm) // spf
+        rms = []
+        for i in range(nframes):
+            seg = pcm[i * spf:(i + 1) * spf]
+            rms.append(math.sqrt(sum(v * v for v in seg[::4]) / (len(seg) / 4)))
+        peak = sorted(rms)[int(len(rms) * 0.97)] or 1
+
+        enc = subprocess.Popen(
+            [ffmpeg, "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
+             "-s", f"{mv.W}x{mv.H}", "-r", str(fps), "-i", "-", "-i", audio,
+             "-c:v", "libx264", "-preset", "veryfast", "-crf", "26", "-pix_fmt", "yuv420p",
+             "-c:a", "aac", "-b:a", "96k", "-shortest", "-movflags", "+faststart", OUT],
+            stdin=subprocess.PIPE)
+        rnd = random.Random(7)
+        next_blink, g, mouth = rnd.randint(40, 110), 0, 0
+        for base, n, first in phrases:
+            for k in range(n):
+                lvl = min(4, int(rms[g] / peak * 5)) if rms[g] > peak * 0.08 else 0
+                mouth = lvl if lvl >= mouth else max(lvl, mouth - 1)
+                blink = next_blink <= g < next_blink + 3
+                if g >= next_blink + 3:
+                    next_blink = g + rnd.randint(60, 130)
+                point = first and k < 32
+                look = -7 if point or (g // 90) % 4 == 3 else 0
+                frame = base.copy()
+                dy = round(4 * math.sin(2 * math.pi * g / (fps * 2.4)))
+                sp = sprite(mouth, blink, point, look)
+                frame.paste(sp, (SPRITE_X, dy), sp)
+                nameplate(frame)
+                enc.stdin.write(frame.tobytes())
+                g += 1
+            if g % (fps * 30) < n:
+                print(f"видео: {g / fps / 60:.1f} мин", flush=True)
+        enc.stdin.close()
+        enc.wait()
+    print(f"{OUT}: {g / fps / 60:.1f} мин")
 
 
 if __name__ == "__main__":
