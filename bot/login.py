@@ -11,6 +11,7 @@ import subprocess
 import traceback
 import sys
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 from playwright.async_api import async_playwright
 
@@ -35,6 +36,7 @@ async def main() -> None:
     presentation = "--presentation" in sys.argv
     errors: list[str] = []
     blobs: list[dict] = []
+    token = ""
 
     try:
         async with async_playwright() as pw:
@@ -59,7 +61,10 @@ async def main() -> None:
                 records.append({"url": resp.url, "status": resp.status, "body": body[:MAX_BODY]})
 
             def on_request(req):
+                nonlocal token
                 url = req.url
+                if "api.trendagent.ru" in url:
+                    token = parse_qs(urlparse(url).query).get("auth_token", [token])[0]
                 if "trendagent" not in url and "trend.tech" not in url:
                     return
                 interesting = req.method != "GET" or any(
@@ -160,6 +165,15 @@ async def main() -> None:
                 print("  4. Откройте одну квартиру, чтобы была видна планировка.")
             print()
             await asyncio.to_thread(input, "Когда закончите, вернитесь сюда и нажмите Enter... ")
+
+            # Бот работает в скрытом браузере: представляется тем же браузером, что и здесь,
+            # и сразу получает ключ доступа, который сайт выдал при входе
+            try:
+                Path(cfg.ua_file).write_text(await page.evaluate("navigator.userAgent"), encoding="utf-8")
+            except BaseException as e:  # noqa: BLE001
+                errors.append(f"user_agent: {e!r}")
+            if token:
+                Path(cfg.token_file).write_text(token, encoding="utf-8")
 
             try:
                 await ctx.storage_state(path=str(state))

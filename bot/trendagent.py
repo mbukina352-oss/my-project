@@ -129,11 +129,34 @@ class TrendAgentClient:
         await self.close()
         self._state_mtime = mtime
         self._pw = await async_playwright().start()
-        self._browser = await self._pw.chromium.launch(headless=True)
+        try:
+            # Полный Chromium в новом скрытом режиме: сайт видит его как обычный браузер
+            self._browser = await self._pw.chromium.launch(channel="chromium", headless=True)
+        except Exception:
+            log.warning("Нет полного Chromium, запускаю упрощённый", exc_info=True)
+            self._browser = await self._pw.chromium.launch(headless=True)
         self._ctx = await self._browser.new_context(
             storage_state=str(state), locale="ru-RU", viewport={"width": 1440, "height": 900},
+            user_agent=self._user_agent(),
         )
+        self._token = self._saved_token()
         return self._ctx
+
+    def _user_agent(self) -> str | None:
+        """Тот же браузер, в котором входили (login.command), без пометки HeadlessChrome."""
+        ua = Path(self.cfg.ua_file)
+        if ua.is_file() and ua.read_text(encoding="utf-8").strip():
+            return ua.read_text(encoding="utf-8").strip()
+        version = self._browser.version if self._browser else ""
+        return (f"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+                f"(KHTML, like Gecko) Chrome/{version} Safari/537.36") if version else None
+
+    def _saved_token(self) -> str:
+        """Ключ доступа, который сайт выдал при входе через login.command."""
+        f = Path(self.cfg.token_file)
+        if f.is_file() and f.stat().st_mtime >= self._state_mtime - 600:
+            return f.read_text(encoding="utf-8").strip()
+        return ""
 
     async def _fetch_token(self) -> str:
         """Открывает сайт и перехватывает auth_token из его запросов к API."""
