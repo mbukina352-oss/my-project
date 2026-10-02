@@ -12,7 +12,7 @@ from .config import settings
 from .matching import closest_flats, pick_flats
 from .models import Flat
 from .pdf import build_pdf
-from .query import Query, parse_query
+from .query import Query, parse_query, split_queries
 from .trendagent import LoginRequired, NotFound, TrendAgentClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -26,6 +26,7 @@ HELP = (
     "<code>Джойс 35млн 60м2</code>\n"
     "<code>Level Мичуринский 2к 25 млн</code>\n"
     "<code>Шагал студия 30м2</code>\n\n"
+    "Можно несколько запросов в одном сообщении, каждый с новой строки.\n\n"
     "Я найду подходящие квартиры в TrendAgent и пришлю их презентации TrendAgent с вашими контактами.\n\n"
     "Если нужна конкретная планировка, пришлите её картинкой или PDF, а в подписи напишите "
     "ЖК, цену и площадь. Я оформлю её в ваш PDF."
@@ -93,7 +94,12 @@ async def from_file(message: Message, bot: Bot) -> None:
 async def search(message: Message) -> None:
     if not allowed(message):
         return
-    q = parse_query(message.text)
+    for text in split_queries(message.text):
+        await search_one(message, text)
+
+
+async def search_one(message: Message, text: str) -> None:
+    q = parse_query(text)
     if not q.complex_name:
         await message.answer("Не понял название ЖК. " + HELP)
         return

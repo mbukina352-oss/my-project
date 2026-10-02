@@ -128,3 +128,12 @@ def test_search_sends_trendagent_presentations(monkeypatch):
     assert docs[0].data == b"%PDF-trendagent"          # презентация TrendAgent как есть
     assert docs[1].data.startswith(b"%PDF") and docs[1].data != b"%PDF-trendagent"  # запасная своя
     assert docs[0].filename == "HIGH LIFE Евро-2 49,8м2 эт10.pdf"
+
+
+def test_split_queries_by_lines():
+    from bot.query import split_queries
+
+    text = "Мюр Мерилиз 259млн 190м2\n\n  Life Time 259млн 190м2 \nДом на Тишинке 259млн 200м2"
+    assert split_queries(text) == ["Мюр Мерилиз 259млн 190м2", "Life Time 259млн 190м2",
+                                   "Дом на Тишинке 259млн 200м2"]
+    assert split_queries("Джойс 35млн 60м2") == ["Джойс 35млн 60м2"]

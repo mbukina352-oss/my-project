@@ -70,3 +70,8 @@ def parse_query(text: str) -> Query:
     name = re.sub(r"[«»\"',;]+", " ", name)
     name = " ".join(name.split())
     return Query(complex_name=name, price=price, area=area, rooms=rooms)
+
+
+def split_queries(text: str) -> list[str]:
+    """Несколько запросов в одном сообщении: каждая непустая строка — отдельный поиск."""
+    return [line.strip() for line in text.splitlines() if line.strip()]
