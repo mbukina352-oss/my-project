@@ -42,6 +42,8 @@ class TrendAgent:
     site_url: str = _env("TA_SITE_URL", "https://msk.trendagent.ru/")
     city_id: str = _env("TA_CITY_ID", "5a5cb42159042faa9a218d04")  # Москва
     state_file: str = _env("TA_STATE_FILE", "data/trendagent_state.json")
+    token_file: str = _env("TA_TOKEN_FILE", "data/trendagent_token.txt")
+    ua_file: str = _env("TA_UA_FILE", "data/trendagent_ua.txt")
 
 
 @dataclass(frozen=True)
