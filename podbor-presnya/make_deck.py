@@ -62,15 +62,15 @@ OBJECTS = [
         ],
     },
     {
-        "slug": "02-dom-na-tishinke",
-        "verdict": "Близко к запросу — проверить цену",
-        "verdict_kind": "warn",
+        "slug": "03-dom-na-tishinke",
+        "verdict": "Скорее вне бюджета",
+        "verdict_kind": "no",
         "name": "Дом на Тишинке",
         "subtitle": "DELUXE от «Донстрой» · дом сдан в 2021 году",
         "address": "Средний Тишинский пер., 5–7, Пресненский р-н, ЦАО",
         "lot_title": "Пентхаус с тёплой и открытой террасой, с дизайнерским ремонтом",
-        "price": "221 млн ₽ *",
-        "price_note": "* в другом объявлении этот лот идёт по ≈ 1,6 млн ₽/м², то есть ≈ 390 млн ₽",
+        "price": "≈ 390–450 млн ₽ *",
+        "price_note": "* два объявления: ≈ 1,6 млн ₽/м² (≈ 390 млн) и 450 млн ₽; в одном источнике встречалась цифра 221 млн — скорее ошибка",
         "params": [
             ("Тёплый контур", "201,5 м²"),
             ("Терраса", "83 м²"),
@@ -84,7 +84,7 @@ OBJECTS = [
             ("Терраса 50–80 м²", "83 м² (+3)", "warn"),
             ("Готовое / до I кв. 2027", "Дом сдан", "ok"),
             ("Пресненский р-н, внутри ТТК", "Тишинка, между Садовым и ТТК", "ok"),
-            ("Бюджет до 259 млн ₽", "221 млн ₽ или ≈ 390 млн ₽", "warn"),
+            ("Бюджет до 259 млн ₽", "≈ 390–450 млн ₽", "no"),
         ],
         "about": [
             "Кухня изолирована, гостиная-столовая с выходом на террасу, мастер-спальня с гардеробной и ванной.",
@@ -93,15 +93,15 @@ OBJECTS = [
             "Пентхаусы дома — с патио, каминами и ванными с окнами. Всего в доме 145 квартир.",
         ],
         "also": "Есть и 4-комнатная 164 м² за 185 млн ₽, но без данных о террасе.",
-        "todo": "Источники называют разную цену: уточнить у продавца. Площадь и терраса на 1,5 и 3 м² выше рамок.",
+        "todo": "Цена почти вдвое выше бюджета. Имеет смысл только как торг с собственником: площадь и терраса почти в рамках.",
         "sources": [
             ("Циан — вторичка в ЖК «Дом на Тишинке»", "https://www.cian.ru/kupit-kvartiru-vtorichka-zhiloy-kompleks-dom-na-tishinke-48505/"),
             ("Донстрой — о проекте", "https://donstroy.moscow/objects/dom-na-tishinke/"),
         ],
     },
     {
-        "slug": "03-myur-meriliz",
-        "verdict": "Перспективно — запросить пентхаусы",
+        "slug": "02-myur-meriliz",
+        "verdict": "Кандидат на закрытые продажи",
         "verdict_kind": "warn",
         "name": "Мюр & Мерилиз",
         "subtitle": "Клубный дом deluxe на Пресне · 6 пентхаусов на 14–15 этажах",
@@ -115,45 +115,67 @@ OBJECTS = [
             ("Потолки", "от 4,7 м"),
             ("Площади в доме", "49–319 м²"),
             ("Квартир всего", "98"),
-            ("Срок", "заявлен I кв. 2025"),
+            ("Срок", "IV кв. 2026"),
         ],
         "checks": [
             ("Площадь 180–200 м²", "пентхаусы до 319 м² — нужна шахматка", "warn"),
             ("Терраса 50–80 м²", "у пентхаусов есть террасы, площадь уточнить", "warn"),
-            ("Готовое / до I кв. 2027", "сменился девелопер, срок уточнить", "warn"),
+            ("Готовое / до I кв. 2027", "IV кв. 2026 — укладывается", "ok"),
             ("Пресненский р-н, внутри ТТК", "Пресня, у Краснопресненской", "ok"),
             ("Бюджет до 259 млн ₽", "по оценке укладывается", "ok"),
         ],
         "about": [
             "15-этажный дом на месте бывшей мебельной фабрики, фасад с полукруглыми колоннами на всю высоту.",
             "Клубная инфраструктура: кинотеатр, спортзал, детский клуб, коворкинг, сад с амфитеатром.",
-            "Проект начинала KR Properties; в декабре 2025 его купила October Group.",
+            "Проект начинала KR Properties; в декабре 2025 его купила October Group, ввод перенесён на IV кв. 2026.",
+            "Новый девелопер перезапускает продажи — пентхаусы часто сначала предлагают агентам закрыто, до сайта.",
         ],
         "also": "",
-        "todo": "Запросить у October Group шахматку пентхаусов (площадь, терраса, цена) и актуальный срок ввода.",
+        "todo": "Запросить у October Group шахматку 6 пентхаусов (площадь, терраса, цена), в том числе лоты закрытых продаж.",
         "sources": [
             ("РБК Недвижимость — о проекте", "https://realty.rbc.ru/news/63fca9039a79477c1cc84328"),
             ("Коммерсантъ — сделка с October Group", "https://www.kommersant.ru/doc/8335380"),
+            ("Urbanus — October Group купила проект", "https://www.urbanus.ru/news/2025-12-30/october-group-priobrela-proekt-klubnogo-doma-myur-i-meriliz"),
             ("Metrium — ЖК «Мюр & Мерилиз»", "https://www.metrium.ru/elitnaya-gorodskaya-nedvijimost/zhilie-kompleksi/myur-&-meriliz/"),
         ],
     },
 ]
 
+OBJECTS.sort(key=lambda o: o["slug"])
+
+# Где искать закрытые (off-market) продажи: в открытых источниках таких лотов нет по определению
+CLOSED = [
+    ("Мюр & Мерилиз", "October Group",
+     "Новый девелопер перезапускает продажи, ввод в IV кв. 2026. Запросить шахматку 6 пентхаусов на 14–15 этажах."),
+    ("Fantastic House", "собственники через агентов",
+     "Всего 3 пентхауса. Пентхаус 232,6 м² выставлен за 279 млн ₽, можно торговаться. Узнать, не продаётся ли третий."),
+    ("Дом на Тишинке", "собственники",
+     "Пентхаус 201,5 м² + терраса 83 м² выставлен за 390–450 млн ₽. Цену можно предложить, но разрыв большой."),
+    ("SINATRA, Б. Тишинский 38", "вторичка",
+     "Пентхаусы до 223 м² с каминами, потолки 5,5 м. Но статус апартаментов, а террасы общие для жильцов."),
+]
+
 REJECTED = [
     ("Life Time (Sminex)", "сдан в 2026, внутри ТТК",
-     "пентхаусы 296–457 м² от 424 млн ₽, скай-виллы 215–277 м² от 310 млн ₽"),
+     "209 м² — 361 млн ₽; пентхаусы от 424 млн ₽, скай-виллы от 310 млн ₽"),
     ("Тишинский бульвар (Sminex)", "ключи 31.03.2028 и позже",
      "срок позже I кв. 2027; пентхаус 190 м² — 421 млн ₽"),
     ("Lucky (Vesper)", "сдан", "4-комнатные 247–363 м² от 420 млн ₽"),
     ("Republic (Страна / FORMA)", "2026–2027", "лоты до ≈ 140 м², террасы до 16 м²"),
     ("Счастье на Пресне, City Park", "сданы", "Красногвардейский бульвар — за ТТК"),
+    ("Бакст (Патриаршие)", "сдан", "≈ 2,5 млн ₽/м²: 2-уровневая 217 м² с террасой — 780 млн ₽"),
+    ("Малая Бронная 15", "сдан", "от 520 млн ₽, ≈ 2,7 млн ₽/м²"),
+    ("Левенсон (Vesper)", "ключи до 31.08.2027", "срок позже I кв. 2027; от 2,7 млн ₽/м², пентхаусы от 289 м²"),
+    ("Дом Спорта (Capital Group)", "сдача I кв. 2029", "срок; 1-комнатные уже от 110 млн ₽"),
 ]
 
 CSS = """
 @page { size: 1920px 1080px; margin: 0; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --green:#0e2c20; --green2:#173d2d; --gold:#d6b166; --gold-l:#f0dca4; --paper:#f7f3ea;
-        --ink:#1d2420; --muted:#6f6a5e; --line:#e2d9c4; --ok:#2f7d4f; --warn:#b07a12; }
+        --ink:#1d2420; --muted:#6f6a5e; --line:#e2d9c4; --ok:#2f7d4f; --warn:#b07a12; --no:#a3402e; }
+.badge.no { background:var(--no); } .st.no { color:var(--no); }
+table.tight td, table.tight th { padding:11px 14px; font-size:22px; }
 body { font-family: 'Inter', sans-serif; color: var(--ink); }
 .slide { width:1920px; height:1080px; position:relative; overflow:hidden; page-break-after:always;
          background: var(--paper); padding: 96px 120px; }
@@ -236,8 +258,8 @@ def summary() -> str:
                   f'<div class="m">{e(o["address"])}</div></div>')
     return (f'<section class="slide"><div class="brand">AXLEV ESTATE</div><div class="kicker">Итог подбора</div>'
             f'<h2>Три объекта на Пресне внутри ТТК</h2>'
-            f'<div class="lead">Под все пять критериев подходит один лот, Fantastic House. Ещё два '
-            f'близки к запросу, их нужно уточнить.</div>'
+            f'<div class="lead">Под все пять критериев подходит Fantastic House. Мюр & Мерилиз — главный '
+            f'кандидат на закрытые продажи. Дом на Тишинке после уточнения цены выходит за бюджет.</div>'
             f'<div class="cards">{cards}</div>{foot("Сводка")}</section>')
 
 
@@ -253,7 +275,7 @@ def object_slides(o: dict, n: int) -> str:
           f'<div><div class="price"><div class="k">Цена</div><div class="v">{e(o["price"])}</div>'
           f'<div class="n">{e(o["price_note"])}</div></div>'
           f'<div class="note">{e(o["todo"])}</div></div></div>{foot(o["name"])}</section>')
-    rows = "".join(f'<tr><td class="st {k}">{"✓" if k == "ok" else "!"}</td><td>{e(c)}</td><td><b>{e(v)}</b></td></tr>'
+    rows = "".join(f'<tr><td class="st {k}">{ {"ok": "✓", "warn": "!", "no": "✗"}[k] }</td><td>{e(c)}</td><td><b>{e(v)}</b></td></tr>'
                    for c, v, k in o["checks"])
     bullets = "".join(f"<li>{e(b)}</li>" for b in o["about"])
     also = f'<div class="note">{e(o["also"])}</div>' if o["also"] else ""
@@ -270,10 +292,19 @@ def rejected() -> str:
     rows = "".join(f"<tr><td><b>{e(a)}</b></td><td>{e(b)}</td><td>{e(c)}</td></tr>" for a, b, c in REJECTED)
     return (f'<section class="slide"><div class="brand">AXLEV ESTATE</div><div class="kicker">Тоже проверили</div>'
             f'<h2>Почему не вошли в подбор</h2>'
-            f'<table style="margin-top:44px"><tr><th>Проект</th><th>Статус</th><th>Причина</th></tr>{rows}</table>'
-            f'<div class="note">Сайты агрегаторов и TrendAgent из облачной среды недоступны, поэтому данные взяты из '
-            f'поисковой выдачи на {DATE}. До показа сверьте наличие и цены у застройщика или в TrendAgent.</div>'
+            f'<table class="tight" style="margin-top:36px"><tr><th>Проект</th><th>Статус</th><th>Причина</th></tr>{rows}</table>'
             f'{foot("Отсев")}</section>')
+
+
+def closed() -> str:
+    rows = "".join(f"<tr><td><b>{e(a)}</b></td><td>{e(b)}</td><td>{e(c)}</td></tr>" for a, b, c in CLOSED)
+    return (f'<section class="slide"><div class="brand">AXLEV ESTATE</div><div class="kicker">Закрытые продажи</div>'
+            f'<h2>Что запросить вне открытого рынка</h2>'
+            f'<div class="lead">Закрытые лоты не публикуют, поэтому здесь не готовые предложения, а адреса для запроса.</div>'
+            f'<table style="margin-top:36px"><tr><th>Объект</th><th>Кого спрашивать</th><th>Что запросить</th></tr>{rows}</table>'
+            f'<div class="note">Данные из поисковой выдачи на {DATE}: TrendAgent и сайты агрегаторов из облачной среды '
+            f'недоступны. В TrendAgent закрытые лоты застройщиков иногда видны агентам — проверьте там «Мюр & Мерилиз».</div>'
+            f'{foot("Закрытые продажи")}</section>')
 
 
 def page(body: str, title: str) -> str:
@@ -287,7 +318,7 @@ def main() -> None:
     jobs = []
     body = cover("Квартира с террасой на Пресне",
                  "Подбор: 3 объекта внутри ТТК · готовое или сдача до I кв. 2027")
-    body += summary() + "".join(object_slides(o, i) for i, o in enumerate(OBJECTS, 1)) + rejected()
+    body += summary() + "".join(object_slides(o, i) for i, o in enumerate(OBJECTS, 1)) + closed() + rejected()
     (out / "00-podbor.html").write_text(page(body, "Подбор: Пресня с террасой"), encoding="utf-8")
     jobs.append(["00-podbor.html", "00-Подбор-Пресня-терраса.pdf"])
     for i, o in enumerate(OBJECTS, 1):
