@@ -320,7 +320,7 @@ def main() -> None:
                  "Подбор: 3 объекта внутри ТТК · готовое или сдача до I кв. 2027")
     body += summary() + "".join(object_slides(o, i) for i, o in enumerate(OBJECTS, 1)) + closed() + rejected()
     (out / "00-podbor.html").write_text(page(body, "Подбор: Пресня с террасой"), encoding="utf-8")
-    jobs.append(["00-podbor.html", "00-Подбор-Пресня-терраса.pdf"])
+    jobs.append(["00-podbor.html", "00-podbor-presnya.pdf"])
     for i, o in enumerate(OBJECTS, 1):
         body = cover(o["name"], f'{o["lot_title"]} · {o["price"]}') + object_slides(o, i)
         (out / f'{o["slug"]}.html').write_text(page(body, o["name"]), encoding="utf-8")
