@@ -70,8 +70,10 @@ async def main() -> None:
                 interesting = req.method != "GET" or any(
                     w in url.lower() for w in ("present", "pdf", "print", "export", "share", "download"))
                 if interesting:
+                    # Тело бывает сжатым (gzip): post_data на нём падает, берём байты как есть
+                    post = (req.post_data_buffer or b"").decode("utf-8", "replace")
                     requests.append({"method": req.method, "url": url, "type": req.resource_type,
-                                     "post": (req.post_data or "")[:20_000]})
+                                     "post": post[:20_000]})
 
             async def on_other_response(resp):
                 ctype = resp.headers.get("content-type") or ""
