@@ -40,10 +40,15 @@
     color: var(--gold); display: flex; align-items: center; gap: 22px; margin-bottom: 34px; }
   .eyebrow::before { content: ''; width: 60px; height: 1px; background: var(--gold); }
 
-  .logo { font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: .9;
-    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 55%, var(--gold-dark) 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
+  .logo { position: relative; font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: .9;
     filter: drop-shadow(0 6px 14px rgba(0,0,0,.55)); }
+  .logo .main, .logo .sub {
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 55%, var(--gold-dark) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .logo .main {
+    background: linear-gradient(105deg, rgba(255,250,232,0) 40%, rgba(255,250,232,.9) 48%, rgba(255,250,232,0) 56%),
+                linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 55%, var(--gold-dark) 100%);
+    -webkit-background-clip: text; background-clip: text; width: max-content; }
   .logo .main { display: block; font-size: 230px; letter-spacing: 26px; margin-left: -8px; }
   .logo .sub { display: flex; align-items: center; gap: 28px; font-size: 64px; font-weight: 500;
     letter-spacing: 40px; margin-top: 18px; }
@@ -60,22 +65,59 @@
   .footer { position: absolute; left: 150px; right: 150px; bottom: 84px;
     display: flex; justify-content: space-between; font-size: 15px; letter-spacing: 6px;
     text-transform: uppercase; color: rgba(214,177,102,.75); }
+
+  /* золотой луч света сверху справа и свечение глаза льва */
+  .rays { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+    background:
+      radial-gradient(circle at 1598px 352px, rgba(255,214,130,.55) 0, rgba(255,200,110,.18) 22px, rgba(255,200,110,0) 70px),
+      conic-gradient(from 200deg at 1880px -80px, rgba(245,225,164,0) 0deg, rgba(245,225,164,.10) 8deg, rgba(245,225,164,0) 14deg,
+        rgba(245,225,164,.07) 22deg, rgba(245,225,164,0) 30deg, rgba(245,225,164,.05) 38deg, rgba(245,225,164,0) 46deg); }
+
+  /* Москва-Сити: силуэт башен поверх нижней части льва */
+  .skyline { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  .particles { position: absolute; inset: 0; mix-blend-mode: screen; }
+
+  /* блик на логотипе */
+  .sparkle { position: absolute; width: 90px; height: 90px; mix-blend-mode: screen; }
+
+  /* угловые орнаменты на рамке */
+  .corner { position: absolute; width: 70px; height: 70px; border: 0 solid var(--gold); }
+  .corner::after { content: ''; position: absolute; width: 9px; height: 9px; background: var(--gold); transform: rotate(45deg); }
+  .c-tl { left: 30px; top: 30px; border-left-width: 2px; border-top-width: 2px; }
+  .c-tr { right: 30px; top: 30px; border-right-width: 2px; border-top-width: 2px; }
+  .c-bl { left: 30px; bottom: 30px; border-left-width: 2px; border-bottom-width: 2px; }
+  .c-br { right: 30px; bottom: 30px; border-right-width: 2px; border-bottom-width: 2px; }
+  .c-tl::after { left: -5.5px; top: -5.5px; } .c-tr::after { right: -5.5px; top: -5.5px; }
+  .c-bl::after { left: -5.5px; bottom: -5.5px; } .c-br::after { right: -5.5px; bottom: -5.5px; }
+
+  /* разделитель с ромбом под слоганом */
+  .divider { display: flex; align-items: center; gap: 14px; margin-top: 46px; }
+  .divider i { width: 120px; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); }
+  .divider i:first-child { background: linear-gradient(90deg, transparent, var(--gold)); width: 40px; }
+  .divider b { width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); }
+  .address { margin-top: 46px !important; }
 </style>
 </head>
 <body>
 <div class="cover">
   <div class="lion"></div>
   <div class="shade"></div>
+  <div class="rays"></div>
+  <svg class="skyline" id="skyline" viewBox="0 0 1920 1080"></svg>
   <div class="shade-b"></div>
+  <canvas class="particles" id="particles" width="1920" height="1080"></canvas>
   <div class="frame"></div>
+  <div class="corner c-tl"></div><div class="corner c-tr"></div>
+  <div class="corner c-bl"></div><div class="corner c-br"></div>
 
   <div class="content">
     <div class="eyebrow">Агентство недвижимости</div>
     <div class="logo">
-      <span class="main">AXLEV</span>
+      <span class="main">AXLEV</span><svg class="sparkle" style="left:760px;top:-34px" viewBox="0 0 90 90"><defs><radialGradient id="sg"><stop offset="0" stop-color="#fff8e0"/><stop offset=".25" stop-color="#ffe2a0" stop-opacity=".6"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient></defs><circle cx="45" cy="45" r="22" fill="url(#sg)"/><path d="M45 0 L48 42 L90 45 L48 48 L45 90 L42 48 L0 45 L42 42 Z" fill="#fff6dc" opacity=".9"/></svg>
       <span class="sub">ESTATE</span>
     </div>
     <div class="tagline">Эксперты в элитной недвижимости Москвы</div>
+    <div class="divider"><i></i><b></b><i></i></div>
 
     <div class="address">
       <div class="pin">
@@ -93,5 +135,89 @@
 
   <div class="footer"><span>axlev.ru</span><span>Москва · Moscow City</span></div>
 </div>
+
+<script>
+// детерминированный генератор, чтобы картинка каждый раз была одинаковой
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const NS = 'http://www.w3.org/2000/svg', sky = document.getElementById('skyline');
+const el = (tag, attrs, parent = sky) => { const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+const BASE = 958;
+
+// башни Москва-Сити (упрощённые силуэты), слева направо
+const towers = [
+  [[560,BASE],[560,905],[620,905],[620,890],[680,890],[680,BASE]],
+  [[690,BASE],[690,870],[760,870],[760,BASE]],
+  [[770,BASE],[770,845],[830,838],[830,BASE]],
+  [[845,BASE],[845,790],[900,780],[900,BASE]],                                   // Империя
+  [[915,BASE],[915,700],[950,700],[950,690],[990,690],[990,BASE]],               // Город столиц: Москва
+  [[1000,BASE],[1000,745],[1025,745],[1025,735],[1050,735],[1050,BASE]],         // Санкт-Петербург
+  [[1065,BASE],[1062,840],[1075,760],[1062,690],[1078,640],[1128,640],[1142,690],[1130,760],[1142,840],[1138,BASE]], // Эволюция
+  [[1160,BASE],[1160,600],[1205,560],[1205,500],[1209,500],[1209,560],[1240,590],[1240,BASE]], // Федерация Восток
+  [[1248,BASE],[1248,670],[1290,640],[1300,670],[1300,BASE]],                    // Федерация Запад
+  [[1318,BASE],[1318,640],[1340,600],[1368,612],[1385,650],[1385,BASE]],          // Меркурий
+  [[1405,BASE],[1405,612],[1418,598],[1460,598],[1472,612],[1472,BASE]],          // ОКО
+  [[1485,BASE],[1485,705],[1530,705],[1530,BASE]],                               // ОКО-2
+  [[1548,BASE],[1548,720],[1600,712],[1600,BASE]],                               // Набережная
+  [[1612,BASE],[1612,770],[1660,770],[1660,BASE]],
+  [[1672,BASE],[1672,830],[1740,830],[1740,BASE]],
+  [[1752,BASE],[1752,880],[1830,880],[1830,BASE]],
+];
+
+const defs = el('defs', {});
+const g1 = el('linearGradient', {id:'bld', x1:0, y1:0, x2:0, y2:1}, defs);
+el('stop', {offset:0, 'stop-color':'#0f2a1f'}, g1); el('stop', {offset:1, 'stop-color':'#04120c'}, g1);
+const g2 = el('linearGradient', {id:'edge', x1:0, y1:0, x2:0, y2:1}, defs);
+el('stop', {offset:0, 'stop-color':'#f5e1a4'}, g2); el('stop', {offset:.6, 'stop-color':'#d6b166', 'stop-opacity':.5}, g2);
+el('stop', {offset:1, 'stop-color':'#d6b166', 'stop-opacity':0}, g2);
+const g3 = el('linearGradient', {id:'fadeL', x1:0, y1:0, x2:1, y2:0}, defs);
+el('stop', {offset:0, 'stop-color':'#fff', 'stop-opacity':0}, g3); el('stop', {offset:.12, 'stop-color':'#fff'}, g3);
+el('stop', {offset:1, 'stop-color':'#fff'}, g3);
+const m = el('mask', {id:'fade'}, defs); el('rect', {x:540, y:400, width:1400, height:700, fill:'url(#fadeL)'}, m);
+const g4 = el('linearGradient', {id:'refl', x1:0, y1:0, x2:0, y2:1}, defs);
+el('stop', {offset:0, 'stop-color':'#d6b166', 'stop-opacity':.35}, g4); el('stop', {offset:1, 'stop-color':'#d6b166', 'stop-opacity':0}, g4);
+
+const root = el('g', {mask:'url(#fade)', opacity:.92});
+towers.forEach(t => t.forEach(p => { p[1] = BASE - (BASE - p[1]) * .62; }));
+const pts = t => t.map(p => p.join(',')).join(' ');
+towers.forEach((t, i) => {
+  const xs = t.map(p => p[0]), ys = t.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys);
+  const clip = el('clipPath', {id:'c'+i}, defs); el('polygon', {points:pts(t)}, clip);
+  el('polygon', {points:pts(t), fill:'url(#bld)'}, root);
+  // этажи и светящиеся окна
+  const w = el('g', {'clip-path':`url(#c${i})`}, root);
+  for (let y = y0 + 10; y < BASE - 4; y += 9) {
+    el('line', {x1:x0, x2:x1, y1:y, y2:y, stroke:'#d6b166', 'stroke-opacity':.07, 'stroke-width':1}, w);
+    for (let x = x0 + 4; x < x1 - 4; x += 7)
+      if (rnd() < .09) el('rect', {x, y:y+2, width:3.5, height:4, fill:'#f5d999', opacity:.35 + rnd() * .6}, w);
+  }
+  el('polygon', {points:pts(t), fill:'none', stroke:'url(#edge)', 'stroke-width':1.2, 'stroke-linejoin':'round'}, root);
+  // отражение в Москве-реке
+  el('polygon', {points:pts(t.map(([x, y]) => [x, BASE + (BASE - y) * .28])), fill:'url(#refl)', opacity:.35}, root);
+});
+// огонёк на шпиле Федерации
+el('circle', {cx:1207, cy:BASE - (BASE - 497) * .62, r:3, fill:'#fff3cf'}, root);
+el('circle', {cx:1207, cy:BASE - (BASE - 497) * .62, r:14, fill:'#ffd98a', opacity:.25}, root);
+// линия набережной и блики на воде
+el('line', {x1:540, x2:1880, y1:BASE, y2:BASE, stroke:'#d6b166', 'stroke-opacity':.7, 'stroke-width':1.2}, root);
+for (let k = 0; k < 70; k++) {
+  const x = 600 + rnd() * 1260, y = BASE + 6 + rnd() * 50;
+  el('line', {x1:x, x2:x + 8 + rnd() * 30, y1:y, y2:y, stroke:'#f5e1a4', 'stroke-opacity':.08 + rnd() * .25}, root);
+}
+
+// золотая пыль
+const ctx = document.getElementById('particles').getContext('2d');
+for (let k = 0; k < 260; k++) {
+  const right = rnd() < .8;
+  const x = right ? 950 + rnd() * 920 : 60 + rnd() * 900, y = 60 + rnd() * 900;
+  const r = rnd() < .9 ? .6 + rnd() * 1.6 : 2.5 + rnd() * 3.5;
+  const a = (right ? .25 : .12) + rnd() * .5;
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+  g.addColorStop(0, `rgba(255,236,180,${a})`); g.addColorStop(.35, `rgba(230,190,110,${a * .5})`);
+  g.addColorStop(1, 'rgba(230,190,110,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 3, 0, 7); ctx.fill();
+}
+</script>
 </body>
 </html>
